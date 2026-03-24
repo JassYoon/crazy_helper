@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme.dart';
 
 class StarRating extends StatelessWidget {
-  final int rating; // 0-3
+  final int rating;
   final ValueChanged<int> onChanged;
   final double size;
 
-  const StarRating({
-    super.key,
-    required this.rating,
-    required this.onChanged,
-    this.size = 18,
-  });
+  const StarRating({super.key, required this.rating, required this.onChanged, this.size = 18});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +16,6 @@ class StarRating extends StatelessWidget {
         final filled = i < rating;
         return GestureDetector(
           onTap: () {
-            // Click on filled star at same position → unfill from there
             if (filled && i == rating - 1) {
               onChanged(i);
             } else {
@@ -31,9 +26,7 @@ class StarRating extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 1),
             child: Icon(
               filled ? Icons.star : Icons.star_border,
-              color: filled
-                  ? const Color(0xFFFFB74D)
-                  : const Color(0xFF475569),
+              color: filled ? AppColors.star : AppColors.textHint,
               size: size,
             ),
           ),

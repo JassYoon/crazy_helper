@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/theme.dart';
 import '../models/breathing_mode.dart';
 import '../widgets/timer_donut.dart';
 import '../widgets/rest_modal.dart';
@@ -17,17 +18,14 @@ class TimerScreen extends StatefulWidget {
 
 class _TimerScreenState extends State<TimerScreen>
     with SingleTickerProviderStateMixin {
-  // Settings
   int _sets = 4;
   int _restAfter = 5;
   int _sessionCount = 0;
   bool _restEnabled = true;
   int _modeIndex = 0;
 
-  // Modes list (built-in + custom)
   List<BreathingMode> _allModes = [boxBreathing, anxietyRelief];
 
-  // Timer state
   bool _running = false;
   double _elapsed = 0;
   bool _showRest = false;
@@ -81,7 +79,6 @@ class _TimerScreenState extends State<TimerScreen>
   void _onTick(Duration elapsed) {
     final delta = (elapsed - _lastTick).inMicroseconds / 1000000.0;
     _lastTick = elapsed;
-
     setState(() {
       _elapsed += delta;
       if (_elapsed >= _totalDuration) {
@@ -103,13 +100,10 @@ class _TimerScreenState extends State<TimerScreen>
       });
       return;
     }
-
-    // Check rest condition
     if (_restEnabled && _sessionCount >= _restAfter) {
       setState(() => _showRest = true);
       return;
     }
-
     setState(() {
       _sessionCount++;
       _running = true;
@@ -122,9 +116,7 @@ class _TimerScreenState extends State<TimerScreen>
 
   void _cycleMode() {
     if (_running) return;
-    setState(() {
-      _modeIndex = (_modeIndex + 1) % _allModes.length;
-    });
+    setState(() => _modeIndex = (_modeIndex + 1) % _allModes.length);
   }
 
   void _selectMode(int index) {
@@ -174,7 +166,7 @@ class _TimerScreenState extends State<TimerScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF020617),
+      backgroundColor: AppColors.background,
       body: Stack(
         children: [
           SafeArea(
@@ -182,10 +174,7 @@ class _TimerScreenState extends State<TimerScreen>
               children: [
                 // Top bar
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 24,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -193,7 +182,6 @@ class _TimerScreenState extends State<TimerScreen>
                         icon: Icons.arrow_back,
                         onTap: () => Navigator.of(context).pop(),
                       ),
-                      // Mode switcher with hover dropdown
                       _ModeSwitcher(
                         modes: _allModes,
                         currentIndex: _modeIndex,
@@ -216,8 +204,7 @@ class _TimerScreenState extends State<TimerScreen>
                     children: [
                       LayoutBuilder(
                         builder: (context, constraints) {
-                          final donutSize =
-                              constraints.maxWidth.clamp(240.0, 288.0);
+                          final donutSize = constraints.maxWidth.clamp(240.0, 288.0);
                           return TimerDonut(
                             mode: _mode,
                             cycleElapsed: _cycleElapsed,
@@ -242,14 +229,9 @@ class _TimerScreenState extends State<TimerScreen>
                     onTap: _handleStart,
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 48,
-                        vertical: 16,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
                       decoration: BoxDecoration(
-                        color: _running
-                            ? const Color(0xFF334155)
-                            : Colors.white,
+                        color: _running ? AppColors.primaryLight : AppColors.primary,
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Text(
@@ -257,9 +239,7 @@ class _TimerScreenState extends State<TimerScreen>
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: _running
-                              ? Colors.white
-                              : const Color(0xFF020617),
+                          color: _running ? AppColors.textPrimary : AppColors.white,
                           letterSpacing: 1,
                         ),
                       ),
@@ -270,17 +250,14 @@ class _TimerScreenState extends State<TimerScreen>
             ),
           ),
           if (_showRest)
-            RestModal(
-              restAfter: _restAfter,
-              onDismiss: _dismissRest,
-            ),
+            RestModal(restAfter: _restAfter, onDismiss: _dismissRest),
         ],
       ),
     );
   }
 }
 
-// ─── Mode Switcher with hover dropdown ───
+// ─── Mode Switcher ───
 
 class _ModeSwitcher extends StatefulWidget {
   final List<BreathingMode> modes;
@@ -316,18 +293,14 @@ class _ModeSwitcherState extends State<_ModeSwitcher> {
 
   void _hideDropdown() {
     setState(() => _hovering = false);
-    // Delay to allow clicking items
     Future.delayed(const Duration(milliseconds: 200), () {
-      if (!_hovering && mounted) {
-        _overlayController.hide();
-      }
+      if (!_hovering && mounted) _overlayController.hide();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final mode = widget.modes[widget.currentIndex];
-
     return CompositedTransformTarget(
       link: _link,
       child: OverlayPortal(
@@ -366,12 +339,10 @@ class _ModeSwitcherState extends State<_ModeSwitcher> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFF1E293B).withValues(alpha: 0.6),
+                color: AppColors.surfaceLight,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: _hovering
-                      ? const Color(0xFF475569)
-                      : const Color(0xFF334155),
+                  color: _hovering ? AppColors.primary : AppColors.border,
                 ),
               ),
               child: Row(
@@ -379,19 +350,17 @@ class _ModeSwitcherState extends State<_ModeSwitcher> {
                 children: [
                   Text(
                     mode.description,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF94A3B8),
+                      color: AppColors.textSecondary,
                       letterSpacing: 2,
                     ),
                   ),
                   const SizedBox(width: 4),
                   Icon(
-                    _hovering
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    color: const Color(0xFF64748B),
+                    _hovering ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                    color: AppColors.textHint,
                     size: 16,
                   ),
                 ],
@@ -425,12 +394,12 @@ class _ModeDropdown extends StatelessWidget {
         constraints: const BoxConstraints(maxWidth: 220),
         padding: const EdgeInsets.symmetric(vertical: 6),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFF334155)),
+          border: Border.all(color: AppColors.border),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.3),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -446,24 +415,14 @@ class _ModeDropdown extends StatelessWidget {
                 onTap: () => onSelect(i),
                 child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 10,
-                  ),
-                  color: selected
-                      ? const Color(0xFF334155).withValues(alpha: 0.5)
-                      : Colors.transparent,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  color: selected ? AppColors.primaryVeryLight : Colors.transparent,
                   child: Row(
                     children: [
-                      // Phase colors preview
                       ...mode.phases.take(4).map((p) => Container(
-                            width: 8,
-                            height: 8,
+                            width: 8, height: 8,
                             margin: const EdgeInsets.only(right: 3),
-                            decoration: BoxDecoration(
-                              color: p.color,
-                              shape: BoxShape.circle,
-                            ),
+                            decoration: BoxDecoration(color: p.color, shape: BoxShape.circle),
                           )),
                       const SizedBox(width: 6),
                       Expanded(
@@ -471,66 +430,41 @@ class _ModeDropdown extends StatelessWidget {
                           mode.description,
                           style: TextStyle(
                             fontSize: 12,
-                            fontWeight:
-                                selected ? FontWeight.w600 : FontWeight.w400,
-                            color: selected
-                                ? Colors.white
-                                : const Color(0xFF94A3B8),
+                            fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                            color: selected ? AppColors.textPrimary : AppColors.textSecondary,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      Text(
-                        mode.name,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: const Color(0xFF64748B),
-                        ),
-                      ),
+                      Text(mode.name, style: TextStyle(fontSize: 11, color: AppColors.textHint)),
                     ],
                   ),
                 ),
               );
             }),
-            // Divider + Add button
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               height: 1,
-              color: const Color(0xFF334155),
+              color: AppColors.divider,
             ),
             GestureDetector(
               onTap: onAddCustom,
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 10,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 child: Row(
                   children: [
                     Container(
-                      width: 20,
-                      height: 20,
+                      width: 20, height: 20,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: const Color(0xFF475569),
-                        ),
+                        border: Border.all(color: AppColors.border),
                       ),
-                      child: const Icon(
-                        Icons.add,
-                        color: Color(0xFF64748B),
-                        size: 12,
-                      ),
+                      child: Icon(Icons.add, color: AppColors.textHint, size: 12),
                     ),
                     const SizedBox(width: 8),
-                    const Text(
-                      '커스텀 호흡 추가',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF64748B),
-                      ),
-                    ),
+                    Text('커스텀 호흡 추가',
+                        style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                   ],
                 ),
               ),
@@ -545,7 +479,6 @@ class _ModeDropdown extends StatelessWidget {
 class _TopButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
-
   const _TopButton({required this.icon, required this.onTap});
 
   @override
@@ -553,13 +486,13 @@ class _TopButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 44,
-        height: 44,
+        width: 44, height: 44,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: const Color(0xFF334155)),
+          border: Border.all(color: AppColors.border),
+          color: AppColors.white,
         ),
-        child: Icon(icon, color: const Color(0xFF94A3B8), size: 20),
+        child: Icon(icon, color: AppColors.textSecondary, size: 20),
       ),
     );
   }

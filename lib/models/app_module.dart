@@ -19,8 +19,8 @@ class AppModule {
 const List<AppModule> allModules = [
   AppModule(
     id: 'anti_a_timer',
-    name: '마음 안정 타이머',
-    icon: Icons.self_improvement,
+    name: '심호흡 타이머',
+    icon: Icons.schedule,
     iconColor: Color(0xFF66BB6A),
   ),
   AppModule(

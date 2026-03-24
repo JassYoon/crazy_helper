@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme.dart';
 import '../models/todo_list_type.dart';
 import '../models/todo_store.dart';
 import '../widgets/checklist_view.dart';
@@ -45,106 +46,73 @@ class _TodoScreenState extends State<TodoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF020617),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [
-            // Top bar
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
               child: Row(
                 children: [
                   GestureDetector(
                     onTap: () => Navigator.of(context).pop(),
                     child: Container(
-                      width: 44,
-                      height: 44,
+                      width: 44, height: 44,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border:
-                            Border.all(color: const Color(0xFF334155)),
+                        border: Border.all(color: AppColors.border),
+                        color: AppColors.white,
                       ),
-                      child: const Icon(Icons.arrow_back,
-                          color: Color(0xFF94A3B8), size: 20),
+                      child: Icon(Icons.arrow_back, color: AppColors.textSecondary, size: 20),
                     ),
                   ),
                   const SizedBox(width: 16),
-                  const Text(
-                    '할 일',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
+                  Text('할 일',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
                 ],
               ),
             ),
-            // Combo box + auto-reset
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // List type selector (combo box)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
+                      color: AppColors.white,
                       borderRadius: BorderRadius.circular(10),
-                      border:
-                          Border.all(color: const Color(0xFF334155)),
+                      border: Border.all(color: AppColors.border),
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<TodoListType>(
                         value: _currentType,
                         isExpanded: true,
-                        dropdownColor: const Color(0xFF1E293B),
-                        icon: const Icon(Icons.keyboard_arrow_down,
-                            color: Color(0xFF64748B), size: 20),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                        ),
-                        items: TodoListType.values.map((type) {
-                          return DropdownMenuItem(
-                            value: type,
-                            child: Text(type.label),
-                          );
-                        }).toList(),
+                        dropdownColor: AppColors.white,
+                        icon: Icon(Icons.keyboard_arrow_down, color: AppColors.textHint, size: 20),
+                        style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
+                        items: TodoListType.values
+                            .map((type) => DropdownMenuItem(value: type, child: Text(type.label)))
+                            .toList(),
                         onChanged: (val) {
-                          if (val != null) {
-                            setState(() => _currentType = val);
-                          }
+                          if (val != null) setState(() => _currentType = val);
                         },
                       ),
                     ),
                   ),
                   const SizedBox(height: 10),
-                  // Auto-reset checkbox
                   GestureDetector(
-                    onTap: () =>
-                        _store.setAutoReset(!_store.autoReset),
+                    onTap: () => _store.setAutoReset(!_store.autoReset),
                     child: Row(
                       children: [
                         Icon(
-                          _store.autoReset
-                              ? Icons.check_box
-                              : Icons.check_box_outline_blank,
-                          color: _store.autoReset
-                              ? const Color(0xFF60A5FA)
-                              : const Color(0xFF475569),
+                          _store.autoReset ? Icons.check_box : Icons.check_box_outline_blank,
+                          color: _store.autoReset ? AppColors.primary : AppColors.textHint,
                           size: 18,
                         ),
                         const SizedBox(width: 8),
-                        const Text(
-                          '자동 리셋 (날짜 변경시 모든 항목 미완료)',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF94A3B8),
-                          ),
-                        ),
+                        Text('자동 리셋 (날짜 변경시 모든 항목 미완료)',
+                            style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                       ],
                     ),
                   ),
@@ -152,17 +120,12 @@ class _TodoScreenState extends State<TodoScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            // List content
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: _store.loaded
                     ? _buildListView()
-                    : const Center(
-                        child: CircularProgressIndicator(
-                          color: Color(0xFF60A5FA),
-                        ),
-                      ),
+                    : Center(child: CircularProgressIndicator(color: AppColors.primary)),
               ),
             ),
             const SizedBox(height: 16),

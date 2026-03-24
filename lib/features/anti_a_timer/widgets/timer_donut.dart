@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../../../core/theme.dart';
 import '../models/breathing_mode.dart';
 
 class TimerDonut extends StatelessWidget {
@@ -27,9 +28,7 @@ class TimerDonut extends StatelessWidget {
           cycleElapsed: cycleElapsed,
           running: running,
         ),
-        child: Center(
-          child: _buildCenterText(),
-        ),
+        child: Center(child: _buildCenterText()),
       ),
     );
   }
@@ -38,17 +37,15 @@ class TimerDonut extends StatelessWidget {
     if (!running) {
       return Text(
         mode.name,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 15,
-          color: Color(0xFF475569),
+          color: AppColors.textHint,
           fontWeight: FontWeight.w400,
         ),
       );
     }
-
     final phase = _getCurrentPhase();
     final timeLeft = (mode.phases[phase.index].seconds - phase.elapsed).ceil();
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -57,16 +54,16 @@ class TimerDonut extends StatelessWidget {
           style: TextStyle(
             fontSize: 17,
             color: mode.phases[phase.index].color,
-            fontWeight: FontWeight.w400,
+            fontWeight: FontWeight.w500,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           '$timeLeft',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 46,
             fontWeight: FontWeight.w700,
-            color: Colors.white,
+            color: AppColors.textPrimary,
           ),
         ),
       ],
@@ -91,8 +88,7 @@ class _DonutPainter extends CustomPainter {
   final bool running;
 
   static const double strokeWidth = 36;
-  static const Color backgroundRingColor = Color(0xFF1E293B);
-  static const double guideOpacity = 0.22;
+  static const double guideOpacity = 0.18;
 
   _DonutPainter({
     required this.mode,
@@ -104,29 +100,24 @@ class _DonutPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = (min(size.width, size.height) - strokeWidth) / 2;
-    final circumference = 2 * pi * radius;
 
-    // Background ring
+    // Background ring — light green
     final bgPaint = Paint()
-      ..color = backgroundRingColor
+      ..color = AppColors.primaryVeryLight
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.butt;
-
     canvas.drawCircle(center, radius, bgPaint);
 
-    // Calculate segments
+    // Segments
     final totalPerCycle = mode.totalPerCycle;
     final segments = <_Segment>[];
-    double startAngle = -pi / 2; // Start from top
-
+    double startAngle = -pi / 2;
     for (int i = 0; i < mode.phases.length; i++) {
-      final arcLen = (mode.phases[i].seconds / totalPerCycle) * circumference;
       final sweepAngle = (mode.phases[i].seconds / totalPerCycle) * 2 * pi;
       segments.add(_Segment(
         startAngle: startAngle,
         sweepAngle: sweepAngle,
-        arcLen: arcLen,
         color: mode.phases[i].color,
         duration: mode.phases[i].seconds.toDouble(),
       ));
@@ -135,21 +126,19 @@ class _DonutPainter extends CustomPainter {
 
     final rect = Rect.fromCircle(center: center, radius: radius);
 
-    // Phase guide arcs (faded)
+    // Guide arcs (faded)
     for (final seg in segments) {
       final guidePaint = Paint()
         ..color = seg.color.withValues(alpha: guideOpacity)
         ..style = PaintingStyle.stroke
         ..strokeWidth = strokeWidth
         ..strokeCap = StrokeCap.butt;
-
       canvas.drawArc(rect, seg.startAngle, seg.sweepAngle, false, guidePaint);
     }
 
-    // Progress arcs (animated, only when running)
+    // Progress arcs
     if (running) {
       final phase = _getCurrentPhase();
-
       for (int i = 0; i < segments.length; i++) {
         double completedRatio;
         if (i < phase.index) {
@@ -159,21 +148,14 @@ class _DonutPainter extends CustomPainter {
         } else {
           completedRatio = 0.0;
         }
-
         if (completedRatio > 0.001) {
           final progressPaint = Paint()
             ..color = segments[i].color
             ..style = PaintingStyle.stroke
             ..strokeWidth = strokeWidth
             ..strokeCap = StrokeCap.butt;
-
-          canvas.drawArc(
-            rect,
-            segments[i].startAngle,
-            segments[i].sweepAngle * completedRatio,
-            false,
-            progressPaint,
-          );
+          canvas.drawArc(rect, segments[i].startAngle,
+              segments[i].sweepAngle * completedRatio, false, progressPaint);
         }
       }
     }
@@ -201,14 +183,11 @@ class _DonutPainter extends CustomPainter {
 class _Segment {
   final double startAngle;
   final double sweepAngle;
-  final double arcLen;
   final Color color;
   final double duration;
-
   _Segment({
     required this.startAngle,
     required this.sweepAngle,
-    required this.arcLen,
     required this.color,
     required this.duration,
   });

@@ -3,6 +3,7 @@ import '../core/theme.dart';
 import '../models/app_module.dart';
 import '../widgets/logo_widget.dart';
 import '../features/anti_a_timer/screens/timer_screen.dart';
+import '../features/todolist/screens/todo_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final Function(String moduleId)? onModuleDragToMenu;
@@ -170,11 +171,15 @@ class _ModuleCardState extends State<_ModuleCard> {
       child: GestureDetector(
         onDoubleTap: widget.module.available
             ? () {
+                Widget? screen;
                 if (widget.module.id == 'anti_a_timer') {
+                  screen = const TimerScreen();
+                } else if (widget.module.id == 'todolist') {
+                  screen = const TodoScreen();
+                }
+                if (screen != null) {
                   Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const TimerScreen(),
-                    ),
+                    MaterialPageRoute(builder: (_) => screen!),
                   );
                 }
               }

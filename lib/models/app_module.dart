@@ -24,10 +24,16 @@ const List<AppModule> allModules = [
     iconColor: Color(0xFF66BB6A),
   ),
   AppModule(
+    id: 'todolist',
+    name: '할 일',
+    icon: Icons.checklist,
+    iconColor: Color(0xFF42A5F5),
+  ),
+  AppModule(
     id: 'white_noise',
     name: '백색 소음',
     icon: Icons.graphic_eq,
-    iconColor: Color(0xFF42A5F5),
+    iconColor: Color(0xFF78909C),
     available: false,
   ),
   AppModule(

@@ -1,3 +1,5 @@
+import 'dart:ui' show FontFeature;
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -30,16 +32,74 @@ class AppColors {
   static const Color success = Color(0xFF66BB6A);
 }
 
-ThemeData appTheme() {
-  final textTheme = GoogleFonts.notoSansKrTextTheme();
+/// 플로팅 위젯(원형 버튼)과 메뉴 바 — 홈 화면과 동일한 흰 배경·[border]·프라이머리 톤 그림자.
+abstract final class AppFloatingChrome {
+  AppFloatingChrome._();
 
-  return ThemeData(
+  static const double widgetSize = 56;
+  static const double menuBarHeight = 52;
+  static const double menuBarGap = 8;
+
+  static List<BoxShadow> get _shadow => [
+        BoxShadow(
+          color: AppColors.primary.withValues(alpha: 0.18),
+          blurRadius: 14,
+          offset: const Offset(0, 3),
+        ),
+      ];
+
+  /// 메뉴 바·빈 상태 안내 패널
+  static BoxDecoration get menuPanel => BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+        boxShadow: _shadow,
+      );
+
+  /// 메인 플로팅 위젯(로고) 원
+  static BoxDecoration get widgetOrb => BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColors.white,
+        border: Border.all(color: AppColors.border, width: 2),
+        boxShadow: _shadow,
+      );
+}
+
+ThemeData appTheme() {
+  final base = ThemeData(
+    useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(
       seedColor: AppColors.primary,
       brightness: Brightness.light,
     ),
     scaffoldBackgroundColor: AppColors.background,
-    textTheme: textTheme,
-    useMaterial3: true,
   );
+  return base.copyWith(
+    textTheme: GoogleFonts.notoSansKrTextTheme(base.textTheme),
+    primaryTextTheme: GoogleFonts.notoSansKrTextTheme(base.primaryTextTheme),
+  );
+}
+
+/// [appTheme]의 본문 글꼴(Noto Sans KR)을 유지한 채 크기·색만 덮어씁니다.
+TextStyle appStyle(
+  BuildContext context, {
+  double? fontSize,
+  FontWeight? fontWeight,
+  Color? color,
+  TextDecoration? decoration,
+  Color? decorationColor,
+  double? height,
+  double? letterSpacing,
+  List<FontFeature>? fontFeatures,
+}) {
+  return Theme.of(context).textTheme.bodyMedium!.copyWith(
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        color: color,
+        decoration: decoration,
+        decorationColor: decorationColor,
+        height: height,
+        letterSpacing: letterSpacing,
+        fontFeatures: fontFeatures,
+      );
 }

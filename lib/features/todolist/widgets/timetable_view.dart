@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/app_text_input.dart';
 import '../../../core/theme.dart';
 import '../models/todo_item.dart';
 import '../models/todo_list_type.dart';
@@ -30,15 +31,30 @@ class _TimetableViewState extends State<TimetableView> {
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: Text('${_formatHour(hour)} 할 일 추가',
-            style: TextStyle(color: AppColors.textPrimary, fontSize: 15)),
+        title: Text(
+          '${_formatHour(hour)} 할 일 추가',
+          style: appStyle(
+            ctx,
+            color: AppColors.textPrimary,
+            fontSize: 15,
+          ),
+        ),
         content: TextField(
           controller: controller,
           autofocus: true,
-          style: TextStyle(color: AppColors.textPrimary, fontSize: 13),
+          keyboardType: AppTextInput.keyboard,
+          style: appStyle(
+            ctx,
+            color: AppColors.textPrimary,
+            fontSize: 13,
+          ),
           decoration: InputDecoration(
             hintText: '할 일 입력...',
-            hintStyle: TextStyle(color: AppColors.textHint, fontSize: 13),
+            hintStyle: appStyle(
+              ctx,
+              color: AppColors.textHint,
+              fontSize: 13,
+            ),
             filled: true,
             fillColor: AppColors.surfaceLight,
             border: OutlineInputBorder(
@@ -52,10 +68,20 @@ class _TimetableViewState extends State<TimetableView> {
           onSubmitted: (val) => Navigator.of(ctx).pop(val),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(),
-              child: Text('취소', style: TextStyle(color: AppColors.textSecondary))),
-          TextButton(onPressed: () => Navigator.of(ctx).pop(controller.text),
-              child: Text('추가', style: TextStyle(color: AppColors.primary))),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(
+              '취소',
+              style: appStyle(ctx, color: AppColors.textSecondary),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(controller.text),
+            child: Text(
+              '추가',
+              style: appStyle(ctx, color: AppColors.primary),
+            ),
+          ),
         ],
       ),
     );
@@ -121,8 +147,13 @@ class _TimetableViewState extends State<TimetableView> {
     );
   }
 
-  TextStyle get _headerStyle =>
-      TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.5);
+  TextStyle get _headerStyle => appStyle(
+        context,
+        fontSize: 11,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textSecondary,
+        letterSpacing: 0.5,
+      );
 }
 
 class _TimeSlot extends StatefulWidget {
@@ -175,7 +206,8 @@ class _TimeSlotState extends State<_TimeSlot> {
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
                     widget.label,
-                    style: TextStyle(
+                    style: appStyle(
+                      context,
                       fontSize: 12,
                       fontWeight: _isCurrentHour ? FontWeight.w700 : FontWeight.w500,
                       color: _isCurrentHour ? AppColors.primaryDark : AppColors.textSecondary,
@@ -188,8 +220,14 @@ class _TimeSlotState extends State<_TimeSlot> {
                 child: widget.items.isEmpty
                     ? Padding(
                         padding: const EdgeInsets.only(top: 4),
-                        child: Text(_hovering ? '+ 클릭하여 추가' : '',
-                            style: TextStyle(fontSize: 12, color: AppColors.textHint)),
+                        child: Text(
+                          _hovering ? '+ 클릭하여 추가' : '',
+                          style: appStyle(
+                            context,
+                            fontSize: 12,
+                            color: AppColors.textHint,
+                          ),
+                        ),
                       )
                     : Column(
                         children: widget.items.map((item) {
@@ -243,7 +281,8 @@ class _TimetableItemRowState extends State<_TimetableItemRow> {
                 onTap: () {},
                 child: Text(
                   widget.item.content,
-                  style: TextStyle(
+                  style: appStyle(
+                    context,
                     fontSize: 13,
                     color: done ? AppColors.textHint : AppColors.textPrimary,
                     decoration: done ? TextDecoration.lineThrough : null,

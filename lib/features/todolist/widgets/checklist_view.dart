@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/app_text_input.dart';
 import '../../../core/theme.dart';
 import '../models/todo_item.dart';
 import '../models/todo_list_type.dart';
@@ -99,7 +100,16 @@ class _ChecklistViewState extends State<ChecklistView> {
           child: Container(
             color: AppColors.white,
             child: items.isEmpty
-                ? Center(child: Text('할 일을 추가하세요', style: TextStyle(color: AppColors.textHint, fontSize: 14)))
+                ? Center(
+                    child: Text(
+                      '할 일을 추가하세요',
+                      style: appStyle(
+                        context,
+                        color: AppColors.textHint,
+                        fontSize: 14,
+                      ),
+                    ),
+                  )
                 : ListView.builder(
                     itemCount: items.length,
                     itemBuilder: (context, i) {
@@ -134,10 +144,19 @@ class _ChecklistViewState extends State<ChecklistView> {
                 child: TextField(
                   controller: _addController,
                   focusNode: _focusNode,
-                  style: TextStyle(color: AppColors.textPrimary, fontSize: 13),
+                  keyboardType: AppTextInput.keyboard,
+                  style: appStyle(
+                    context,
+                    color: AppColors.textPrimary,
+                    fontSize: 13,
+                  ),
                   decoration: InputDecoration(
                     hintText: '새 할 일 입력...',
-                    hintStyle: TextStyle(color: AppColors.textHint, fontSize: 13),
+                    hintStyle: appStyle(
+                      context,
+                      color: AppColors.textHint,
+                      fontSize: 13,
+                    ),
                     filled: true,
                     fillColor: AppColors.white,
                     border: OutlineInputBorder(
@@ -167,8 +186,13 @@ class _ChecklistViewState extends State<ChecklistView> {
     );
   }
 
-  TextStyle get _headerStyle =>
-      TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.5);
+  TextStyle get _headerStyle => appStyle(
+        context,
+        fontSize: 11,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textSecondary,
+        letterSpacing: 0.5,
+      );
 }
 
 class _ChecklistRow extends StatefulWidget {
@@ -233,7 +257,8 @@ class _ChecklistRowState extends State<_ChecklistRow> {
               child: Text(
                 '${widget.number}',
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: appStyle(
+                  context,
                   fontSize: 13,
                   color: done ? AppColors.textHint : AppColors.textSecondary,
                   fontWeight: FontWeight.w500,
@@ -247,8 +272,17 @@ class _ChecklistRowState extends State<_ChecklistRow> {
                   ? TextField(
                       controller: _controller,
                       autofocus: true,
-                      style: TextStyle(color: AppColors.textPrimary, fontSize: 13),
-                      decoration: const InputDecoration(border: InputBorder.none, isDense: true, contentPadding: EdgeInsets.zero),
+                      keyboardType: AppTextInput.keyboard,
+                      style: appStyle(
+                        context,
+                        color: AppColors.textPrimary,
+                        fontSize: 13,
+                      ),
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
+                      ),
                       onSubmitted: (val) { widget.onContentChanged(val); setState(() => _editing = false); },
                       onTapOutside: (_) { widget.onContentChanged(_controller.text); setState(() => _editing = false); },
                     )
@@ -256,7 +290,8 @@ class _ChecklistRowState extends State<_ChecklistRow> {
                       onDoubleTap: () => setState(() => _editing = true),
                       child: Text(
                         widget.item.content,
-                        style: TextStyle(
+                        style: appStyle(
+                          context,
                           fontSize: 13,
                           color: done ? AppColors.textHint : AppColors.textPrimary,
                           decoration: done ? TextDecoration.lineThrough : null,

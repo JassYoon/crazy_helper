@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import '../core/theme.dart';
 import '../core/module_registry.dart';
+import '../features/anti_a_timer/screens/timer_screen.dart';
+import '../features/todolist/screens/todo_screen.dart';
 import 'logo_widget.dart';
 import 'menu_bar_widget.dart';
 
@@ -24,10 +26,6 @@ class _FloatingWidgetScreenState extends State<FloatingWidgetScreen> {
   bool _menuAbove = true;
   Offset _widgetPosition = Offset.zero;
   double _screenHeight = 800;
-
-  static const double widgetSize = 56;
-  static const double menuBarHeight = 52;
-  static const double menuBarGap = 8;
 
   @override
   void initState() {
@@ -61,6 +59,24 @@ class _FloatingWidgetScreenState extends State<FloatingWidgetScreen> {
     });
   }
 
+  Future<void> _openModuleById(String moduleId) async {
+    final route = switch (moduleId) {
+      'anti_a_timer' => MaterialPageRoute<void>(
+          builder: (_) => const TimerScreen(),
+        ),
+      'todolist' => MaterialPageRoute<void>(
+          builder: (_) => const TodoScreen(),
+        ),
+      _ => null,
+    };
+    if (route == null) return;
+    await windowManager.setSize(const Size(420, 680));
+    if (!mounted) return;
+    await Navigator.of(context).push(route);
+    if (!mounted) return;
+    await _updateWindowSize();
+  }
+
   void _toggleMenu() {
     setState(() {
       _menuVisible = !_menuVisible;
@@ -70,16 +86,20 @@ class _FloatingWidgetScreenState extends State<FloatingWidgetScreen> {
 
   Future<void> _updateWindowSize() async {
     if (_menuVisible) {
-      final totalHeight = widgetSize + menuBarGap + menuBarHeight;
+      final totalHeight = AppFloatingChrome.widgetSize +
+          AppFloatingChrome.menuBarGap +
+          AppFloatingChrome.menuBarHeight;
       final menuModules = widget.registry.menuModules;
       final menuWidth = menuModules.isEmpty
           ? 220.0
           : (menuModules.length * 48.0 + 16).clamp(100.0, 400.0);
-      final width = menuWidth.clamp(widgetSize, 400.0);
+      final width = menuWidth.clamp(AppFloatingChrome.widgetSize, 400.0);
 
       await windowManager.setSize(Size(width, totalHeight));
     } else {
-      await windowManager.setSize(const Size(widgetSize, widgetSize));
+      await windowManager.setSize(
+        const Size(AppFloatingChrome.widgetSize, AppFloatingChrome.widgetSize),
+      );
     }
   }
 
@@ -90,23 +110,9 @@ class _FloatingWidgetScreenState extends State<FloatingWidgetScreen> {
     final widgetCircle = GestureDetector(
       onTap: _toggleMenu,
       child: Container(
-        width: widgetSize,
-        height: widgetSize,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: AppColors.white,
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 2),
-            ),
-          ],
-          border: Border.all(
-            color: AppColors.primaryLight,
-            width: 2,
-          ),
-        ),
+        width: AppFloatingChrome.widgetSize,
+        height: AppFloatingChrome.widgetSize,
+        decoration: AppFloatingChrome.widgetOrb,
         child: const Center(
           child: LogoWidget(size: 40),
         ),
@@ -122,6 +128,7 @@ class _FloatingWidgetScreenState extends State<FloatingWidgetScreen> {
               return MenuBarWidget(
                 modules: menuModules,
                 showAbove: _menuAbove,
+                onModuleOpen: _openModuleById,
               );
             },
           )
@@ -137,8 +144,16 @@ class _FloatingWidgetScreenState extends State<FloatingWidgetScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: _menuAbove
-              ? [menuBar, if (_menuVisible) const SizedBox(height: menuBarGap), widgetCircle]
-              : [widgetCircle, if (_menuVisible) const SizedBox(height: menuBarGap), menuBar],
+              ? [
+                  menuBar,
+                  if (_menuVisible) const SizedBox(height: AppFloatingChrome.menuBarGap),
+                  widgetCircle,
+                ]
+              : [
+                  widgetCircle,
+                  if (_menuVisible) const SizedBox(height: AppFloatingChrome.menuBarGap),
+                  menuBar,
+                ],
         ),
       ),
     );

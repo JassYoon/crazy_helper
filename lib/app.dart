@@ -44,7 +44,9 @@ class _CrazyHelperAppState extends State<CrazyHelperApp> with WindowListener {
 
   Future<void> _switchToWidgetMode() async {
     setState(() => _mode = AppMode.widget);
-    await windowManager.setSize(const Size(56, 56));
+    await windowManager.setSize(
+      const Size(AppFloatingChrome.widgetSize, AppFloatingChrome.widgetSize),
+    );
     await windowManager.setAlwaysOnTop(true);
     await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
     await windowManager.setSkipTaskbar(true);
@@ -69,7 +71,20 @@ class _CrazyHelperAppState extends State<CrazyHelperApp> with WindowListener {
     return MaterialApp(
       title: '제정신 지킴이',
       debugShowCheckedModeBanner: false,
-      theme: appTheme(),
+      theme: _mode == AppMode.widget
+          ? appTheme().copyWith(
+              scaffoldBackgroundColor: Colors.transparent,
+            )
+          : appTheme(),
+      builder: (context, child) {
+        if (_mode == AppMode.widget) {
+          return ColoredBox(
+            color: Colors.transparent,
+            child: child,
+          );
+        }
+        return child ?? const SizedBox.shrink();
+      },
       home: _mode == AppMode.home
           ? HomeScreen(
               onModuleDragToMenu: (moduleId) {

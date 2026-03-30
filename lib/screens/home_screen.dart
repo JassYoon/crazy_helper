@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/theme.dart';
 import '../models/app_module.dart';
 import '../widgets/logo_widget.dart';
+import '../widgets/module_icon_widget.dart';
 import '../features/anti_a_timer/screens/timer_screen.dart';
 import '../features/todolist/screens/todo_screen.dart';
 
@@ -30,7 +31,8 @@ class HomeScreen extends StatelessWidget {
                 const SizedBox(height: 12),
                 Text(
                   '제정신 지킴이',
-                  style: TextStyle(
+                  style: appStyle(
+                    context,
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
@@ -40,7 +42,8 @@ class HomeScreen extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   '마음의 평화를 지켜드립니다',
-                  style: TextStyle(
+                  style: appStyle(
+                    context,
                     fontSize: 13,
                     color: AppColors.textSecondary,
                   ),
@@ -104,7 +107,8 @@ class HomeScreen extends StatelessWidget {
                                 const SizedBox(width: 6),
                                 Text(
                                   isHovering ? '놓아서 메뉴에 추가' : '여기에 끌어다 놓기',
-                                  style: TextStyle(
+                                  style: appStyle(
+                                    context,
                                     fontSize: 13,
                                     color: isHovering
                                         ? AppColors.primary
@@ -169,21 +173,18 @@ class _ModuleCardState extends State<_ModuleCard> {
       onEnter: (_) => setState(() => _hovering = true),
       onExit: (_) => setState(() => _hovering = false),
       child: GestureDetector(
-        onDoubleTap: widget.module.available
-            ? () {
-                Widget? screen;
-                if (widget.module.id == 'anti_a_timer') {
-                  screen = const TimerScreen();
-                } else if (widget.module.id == 'todolist') {
-                  screen = const TodoScreen();
-                }
-                if (screen != null) {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => screen!),
-                  );
-                }
-              }
-            : null,
+        onDoubleTap: () {
+          final screen = switch (widget.module.id) {
+            'anti_a_timer' => const TimerScreen(),
+            'todolist' => const TodoScreen(),
+            _ => null,
+          };
+          if (screen != null) {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => screen),
+            );
+          }
+        },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           margin: const EdgeInsets.symmetric(vertical: 4),
@@ -205,9 +206,8 @@ class _ModuleCardState extends State<_ModuleCard> {
                   color: widget.module.iconColor.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  widget.module.icon,
-                  color: widget.module.iconColor,
+                child: ModuleIconWidget(
+                  module: widget.module,
                   size: 24,
                 ),
               ),
@@ -216,33 +216,14 @@ class _ModuleCardState extends State<_ModuleCard> {
               Expanded(
                 child: Text(
                   widget.module.name,
-                  style: TextStyle(
+                  style: appStyle(
+                    context,
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
-                    color: widget.module.available
-                        ? AppColors.textPrimary
-                        : AppColors.textSecondary,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ),
-              if (!widget.module.available)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryVeryLight,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    '준비 중',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ),
             ],
           ),
         ),
@@ -270,12 +251,12 @@ class _ModuleCardState extends State<_ModuleCard> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(widget.module.icon,
-                  color: widget.module.iconColor, size: 20),
+              ModuleIconWidget(module: widget.module, size: 20),
               const SizedBox(width: 8),
               Text(
                 widget.module.name,
-                style: TextStyle(
+                style: appStyle(
+                  context,
                   fontSize: 13,
                   color: AppColors.textPrimary,
                   fontWeight: FontWeight.w500,

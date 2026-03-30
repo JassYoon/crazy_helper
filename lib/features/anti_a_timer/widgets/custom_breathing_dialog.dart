@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/app_text_input.dart';
 import '../../../core/theme.dart';
 import '../models/breathing_mode.dart' show BreathingMode, BreathingPhase, kPhaseTemplates;
 
@@ -160,6 +161,7 @@ class _CustomBreathingDialogState extends State<CustomBreathingDialog> {
               const SizedBox(height: 16),
               TextField(
                 controller: _nameController,
+                keyboardType: AppTextInput.keyboard,
                 style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
                 decoration: InputDecoration(
                   hintText: '호흡 이름 (예: 나만의 호흡)',
@@ -242,6 +244,7 @@ class _PhaseRow extends StatelessWidget {
             width: 52, height: 32,
             child: TextField(
               controller: phase.secondsController,
+              // 호흡 단계 길이(초) — 숫자만; 이모지 등은 의미 없음
               keyboardType: TextInputType.number,
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),

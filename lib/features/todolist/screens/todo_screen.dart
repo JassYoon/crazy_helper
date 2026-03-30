@@ -67,8 +67,15 @@ class _TodoScreenState extends State<TodoScreen> {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  Text('할 일',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                  Text(
+                    '할 일',
+                    style: appStyle(
+                      context,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -90,9 +97,23 @@ class _TodoScreenState extends State<TodoScreen> {
                         isExpanded: true,
                         dropdownColor: AppColors.white,
                         icon: Icon(Icons.keyboard_arrow_down, color: AppColors.textHint, size: 20),
-                        style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
+                        style: appStyle(
+                          context,
+                          color: AppColors.textPrimary,
+                          fontSize: 14,
+                        ),
                         items: TodoListType.values
-                            .map((type) => DropdownMenuItem(value: type, child: Text(type.label)))
+                            .map((type) => DropdownMenuItem(
+                                  value: type,
+                                  child: Text(
+                                    type.label,
+                                    style: appStyle(
+                                      context,
+                                      color: AppColors.textPrimary,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ))
                             .toList(),
                         onChanged: (val) {
                           if (val != null) setState(() => _currentType = val);
@@ -111,8 +132,14 @@ class _TodoScreenState extends State<TodoScreen> {
                           size: 18,
                         ),
                         const SizedBox(width: 8),
-                        Text('자동 리셋 (날짜 변경시 모든 항목 미완료)',
-                            style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                        Text(
+                          '자동 리셋 (날짜 변경시 모든 항목 미완료)',
+                          style: appStyle(
+                            context,
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
                       ],
                     ),
                   ),

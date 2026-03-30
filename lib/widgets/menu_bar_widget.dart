@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import '../core/theme.dart';
 import '../models/app_module.dart';
+import 'module_icon_widget.dart';
 
 class MenuBarWidget extends StatelessWidget {
   final List<AppModule> modules;
   final bool showAbove;
-  final VoidCallback? onModuleDoubleTap;
+  /// 메뉴에 등록된 `module.id`로 기능 화면을 열 때.
+  final ValueChanged<String>? onModuleOpen;
 
   const MenuBarWidget({
     super.key,
     required this.modules,
     this.showAbove = false,
-    this.onModuleDoubleTap,
+    this.onModuleOpen,
   });
 
   @override
@@ -19,20 +21,11 @@ class MenuBarWidget extends StatelessWidget {
     if (modules.isEmpty) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 12,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
+        decoration: AppFloatingChrome.menuPanel,
         child: Text(
           '기능을 끌어다 놓아 등록하세요',
-          style: TextStyle(
+          style: appStyle(
+            context,
             color: AppColors.textSecondary,
             fontSize: 12,
           ),
@@ -42,22 +35,12 @@ class MenuBarWidget extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      decoration: AppFloatingChrome.menuPanel,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: modules.map((module) {
           return GestureDetector(
-            onDoubleTap: onModuleDoubleTap,
+            onTap: onModuleOpen == null ? null : () => onModuleOpen!(module.id),
             child: Tooltip(
               message: module.name,
               child: Container(
@@ -68,9 +51,8 @@ class MenuBarWidget extends StatelessWidget {
                   color: module.iconColor.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  module.icon,
-                  color: module.iconColor,
+                child: ModuleIconWidget(
+                  module: module,
                   size: 20,
                 ),
               ),

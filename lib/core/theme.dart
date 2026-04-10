@@ -1,7 +1,4 @@
-import 'dart:ui' show FontFeature;
-
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
   // Primary palette
@@ -31,6 +28,8 @@ class AppColors {
   static const Color error = Color(0xFFE57373);
   static const Color success = Color(0xFF66BB6A);
 }
+
+const String _fontFamily = 'KoddiUDOnGothic';
 
 /// 플로팅 위젯(원형 버튼)과 메뉴 바 — 홈 화면과 동일한 흰 배경·[border]·프라이머리 톤 그림자.
 abstract final class AppFloatingChrome {
@@ -68,19 +67,17 @@ abstract final class AppFloatingChrome {
 ThemeData appTheme() {
   final base = ThemeData(
     useMaterial3: true,
+    fontFamily: _fontFamily,
     colorScheme: ColorScheme.fromSeed(
       seedColor: AppColors.primary,
       brightness: Brightness.light,
     ),
     scaffoldBackgroundColor: AppColors.background,
   );
-  return base.copyWith(
-    textTheme: GoogleFonts.notoSansKrTextTheme(base.textTheme),
-    primaryTextTheme: GoogleFonts.notoSansKrTextTheme(base.primaryTextTheme),
-  );
+  return base;
 }
 
-/// [appTheme]의 본문 글꼴(Noto Sans KR)을 유지한 채 크기·색만 덮어씁니다.
+/// [appTheme]의 본문 글꼴(KoddiUD OnGothic)을 유지한 채 크기·색만 덮어씁니다.
 TextStyle appStyle(
   BuildContext context, {
   double? fontSize,
@@ -93,6 +90,7 @@ TextStyle appStyle(
   List<FontFeature>? fontFeatures,
 }) {
   return Theme.of(context).textTheme.bodyMedium!.copyWith(
+        fontFamily: _fontFamily,
         fontSize: fontSize,
         fontWeight: fontWeight,
         color: color,

@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme.dart';
-import '../models/todo_list_type.dart';
-import '../models/todo_store.dart';
-import '../widgets/checklist_view.dart';
-import '../widgets/timetable_view.dart';
-import 'calendar_screen.dart';
+import '../models/done_list_type.dart';
+import '../models/done_store.dart';
+import '../widgets/done_checklist_view.dart';
+import '../widgets/done_timetable_view.dart';
+import 'done_calendar_screen.dart';
 
-class TodoScreen extends StatefulWidget {
-  const TodoScreen({super.key});
+class DoneScreen extends StatefulWidget {
+  const DoneScreen({super.key});
 
   @override
-  State<TodoScreen> createState() => _TodoScreenState();
+  State<DoneScreen> createState() => _DoneScreenState();
 }
 
-class _TodoScreenState extends State<TodoScreen> {
-  final _store = TodoStore();
-  TodoListType _currentType = TodoListType.checklist;
+class _DoneScreenState extends State<DoneScreen> {
+  final _store = DoneStore();
+  DoneListType _currentType = DoneListType.checklist;
 
   @override
   void initState() {
@@ -37,10 +37,10 @@ class _TodoScreenState extends State<TodoScreen> {
 
   Widget _buildListView() {
     switch (_currentType) {
-      case TodoListType.checklist:
-        return ChecklistView(store: _store);
-      case TodoListType.timetable:
-        return TimetableView(store: _store);
+      case DoneListType.checklist:
+        return DoneChecklistView(store: _store);
+      case DoneListType.timetable:
+        return DoneTimetableView(store: _store);
     }
   }
 
@@ -69,7 +69,7 @@ class _TodoScreenState extends State<TodoScreen> {
                   ),
                   const SizedBox(width: 16),
                   Text(
-                    '할 일',
+                    '한 일',
                     style: appStyle(
                       context,
                       fontSize: 18,
@@ -82,69 +82,34 @@ class _TodoScreenState extends State<TodoScreen> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.border),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<TodoListType>(
-                        value: _currentType,
-                        isExpanded: true,
-                        dropdownColor: AppColors.white,
-                        icon: Icon(Icons.keyboard_arrow_down, color: AppColors.textHint, size: 20),
-                        style: appStyle(
-                          context,
-                          color: AppColors.textPrimary,
-                          fontSize: 14,
-                        ),
-                        items: TodoListType.values
-                            .map((type) => DropdownMenuItem(
-                                  value: type,
-                                  child: Text(
-                                    type.label,
-                                    style: appStyle(
-                                      context,
-                                      color: AppColors.textPrimary,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ))
-                            .toList(),
-                        onChanged: (val) {
-                          if (val != null) setState(() => _currentType = val);
-                        },
-                      ),
-                    ),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<DoneListType>(
+                    value: _currentType,
+                    isExpanded: true,
+                    dropdownColor: AppColors.white,
+                    icon: Icon(Icons.keyboard_arrow_down, color: AppColors.textHint, size: 20),
+                    style: appStyle(context, color: AppColors.textPrimary, fontSize: 14),
+                    items: DoneListType.values
+                        .map((type) => DropdownMenuItem(
+                              value: type,
+                              child: Text(
+                                type.label,
+                                style: appStyle(context, color: AppColors.textPrimary, fontSize: 14),
+                              ),
+                            ))
+                        .toList(),
+                    onChanged: (val) {
+                      if (val != null) setState(() => _currentType = val);
+                    },
                   ),
-                  const SizedBox(height: 10),
-                  GestureDetector(
-                    onTap: () => _store.setAutoReset(!_store.autoReset),
-                    child: Row(
-                      children: [
-                        Icon(
-                          _store.autoReset ? Icons.check_box : Icons.check_box_outline_blank,
-                          color: _store.autoReset ? AppColors.primary : AppColors.textHint,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '자동 리셋 (날짜 변경시 모든 항목 미완료)',
-                          style: appStyle(
-                            context,
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -161,7 +126,7 @@ class _TodoScreenState extends State<TodoScreen> {
               child: GestureDetector(
                 onTap: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => CalendarScreen(store: _store)),
+                    MaterialPageRoute(builder: (_) => DoneCalendarScreen(store: _store)),
                   );
                 },
                 child: Container(

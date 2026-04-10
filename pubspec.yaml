@@ -36,7 +36,6 @@ dependencies:
   cupertino_icons: ^1.0.8
   window_manager: ^0.5.1
   shared_preferences: ^2.5.4
-  google_fonts: ^8.0.2
 
 dev_dependencies:
   flutter_test:
@@ -88,5 +87,9 @@ flutter:
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
   #
-  # For details regarding fonts from package dependencies,
-  # see https://flutter.dev/to/font-from-package
+  fonts:
+    - family: KoddiUDOnGothic
+      fonts:
+        - asset: assets/fonts/KoddiUDOnGothic-Regular.ttf
+        - asset: assets/fonts/KoddiUDOnGothic-Bold.ttf
+          weight: 700

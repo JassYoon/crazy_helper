@@ -27,4 +27,10 @@ const List<AppModule> allModules = [
     icon: Icons.checklist,
     iconColor: Color(0xFF42A5F5),
   ),
+  AppModule(
+    id: 'donelist',
+    name: '한 일',
+    icon: Icons.task_alt,
+    iconColor: Color(0xFFFF8A65),
+  ),
 ];

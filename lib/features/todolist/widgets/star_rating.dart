@@ -12,14 +12,15 @@ class StarRating extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: List.generate(3, (i) {
+      children: List.generate(5, (i) {
         final filled = i < rating;
         return GestureDetector(
           onTap: () {
-            if (filled && i == rating - 1) {
-              onChanged(i);
+            final newRating = i + 1;
+            if (newRating == rating && rating > 1) {
+              onChanged(rating - 1);
             } else {
-              onChanged(i + 1);
+              onChanged(newRating);
             }
           },
           child: Padding(

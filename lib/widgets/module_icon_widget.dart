@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/app_module.dart';
 import '../features/todolist/widgets/todo_list_shortcut_icon.dart';
+import '../features/donelist/widgets/done_list_shortcut_icon.dart';
 
 class ModuleIconWidget extends StatelessWidget {
   final AppModule module;
@@ -16,6 +17,9 @@ class ModuleIconWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     if (module.id == 'todolist') {
       return TodoListShortcutIcon(color: module.iconColor, size: size);
+    }
+    if (module.id == 'donelist') {
+      return DoneListShortcutIcon(color: module.iconColor, size: size);
     }
     return Icon(module.icon, color: module.iconColor, size: size);
   }

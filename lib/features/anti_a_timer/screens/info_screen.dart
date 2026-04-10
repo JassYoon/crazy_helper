@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme.dart';
 import '../models/breathing_mode.dart';
@@ -81,17 +82,28 @@ class _InfoScreenState extends State<InfoScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // 사용 방법 (맨 위)
+                    Text('사용 방법', style: _sectionStyle),
+                    const SizedBox(height: 12),
+                    _buildInstruction('1', '호흡 모드를 선택하세요'),
+                    _buildInstruction('2', '시작 버튼을 눌러 도넛 차트의 안내를 따라 호흡하세요'),
+                    _buildInstruction('3', '설정한 세트만큼 반복하면 자동으로 종료됩니다'),
+                    _buildInstruction('4', '직접 호흡 패턴을 등록할 수 있습니다'),
+                    const SizedBox(height: 32),
+                    // 호흡 단계
                     Text('호흡 단계', style: _sectionStyle),
                     const SizedBox(height: 12),
                     ..._buildPhaseGuide(),
                     const SizedBox(height: 32),
-                    _SettingSlider(
+                    // 세트 수
+                    _SettingStepper(
                       label: '세트 수',
                       description: '한 세션의 호흡 반복 횟수',
                       value: _sets, min: 1, max: 20,
                       onChanged: (v) => setState(() => _sets = v),
                     ),
                     const SizedBox(height: 28),
+                    // 휴식 알림
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -121,7 +133,7 @@ class _InfoScreenState extends State<InfoScreen> {
                       child: _restEnabled
                           ? Padding(
                               padding: const EdgeInsets.only(top: 16),
-                              child: _SettingSlider(
+                              child: _SettingStepper(
                                 label: '휴식 간격',
                                 description: '몇 세션마다 휴식을 권할지',
                                 value: _restAfter, min: 1, max: 50,
@@ -130,12 +142,6 @@ class _InfoScreenState extends State<InfoScreen> {
                             )
                           : const SizedBox.shrink(),
                     ),
-                    const SizedBox(height: 32),
-                    Text('사용 방법', style: _sectionStyle),
-                    const SizedBox(height: 12),
-                    _buildInstruction('1', '호흡 모드를 선택하세요 (기본 또는 커스텀)'),
-                    _buildInstruction('2', '시작 버튼을 눌러 도넛 차트의 안내를 따라 호흡하세요'),
-                    _buildInstruction('3', '설정한 세트만큼 반복하면 자동으로 종료됩니다'),
                     const SizedBox(height: 32),
                   ],
                 ),
@@ -198,7 +204,7 @@ class _InfoScreenState extends State<InfoScreen> {
   }
 }
 
-class _SettingSlider extends StatelessWidget {
+class _SettingStepper extends StatefulWidget {
   final String label;
   final String description;
   final int value;
@@ -206,49 +212,133 @@ class _SettingSlider extends StatelessWidget {
   final int max;
   final ValueChanged<int> onChanged;
 
-  const _SettingSlider({
+  const _SettingStepper({
     required this.label, required this.description,
     required this.value, required this.min, required this.max,
     required this.onChanged,
   });
 
   @override
+  State<_SettingStepper> createState() => _SettingStepperState();
+}
+
+class _SettingStepperState extends State<_SettingStepper> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: '${widget.value}');
+  }
+
+  @override
+  void didUpdateWidget(covariant _SettingStepper oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.value != widget.value) {
+      _controller.text = '${widget.value}';
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _commitText() {
+    final parsed = int.tryParse(_controller.text);
+    if (parsed == null) {
+      _controller.text = '${widget.value}';
+      return;
+    }
+    final clamped = parsed.clamp(widget.min, widget.max);
+    if (clamped != widget.value) {
+      widget.onChanged(clamped);
+    }
+    _controller.text = '$clamped';
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Text(widget.label, style: TextStyle(
+            fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 1)),
+        const SizedBox(height: 4),
+        Text(widget.description, style: TextStyle(fontSize: 12, color: AppColors.textHint)),
+        const SizedBox(height: 12),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(label, style: TextStyle(
-                fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 1)),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(color: AppColors.primaryVeryLight, borderRadius: BorderRadius.circular(8)),
-              child: Text('$value',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.primaryDark)),
+            // 숫자 입력 텍스트 박스
+            SizedBox(
+              width: 64, height: 40,
+              child: TextField(
+                controller: _controller,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.primaryDark),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: AppColors.primaryVeryLight,
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.border)),
+                  enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.border)),
+                  focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.primary)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                ),
+                onSubmitted: (_) => _commitText(),
+                onTapOutside: (_) => _commitText(),
+              ),
+            ),
+            const SizedBox(width: 12),
+            // 위/아래 버튼
+            Column(
+              children: [
+                _StepButton(
+                  icon: Icons.keyboard_arrow_up,
+                  onTap: widget.value < widget.max ? () => widget.onChanged(widget.value + 1) : null,
+                  enabled: widget.value < widget.max,
+                ),
+                const SizedBox(height: 4),
+                _StepButton(
+                  icon: Icons.keyboard_arrow_down,
+                  onTap: widget.value > widget.min ? () => widget.onChanged(widget.value - 1) : null,
+                  enabled: widget.value > widget.min,
+                ),
+              ],
             ),
           ],
         ),
-        const SizedBox(height: 4),
-        Text(description, style: TextStyle(fontSize: 12, color: AppColors.textHint)),
-        const SizedBox(height: 8),
-        SliderTheme(
-          data: SliderThemeData(
-            activeTrackColor: AppColors.primary,
-            inactiveTrackColor: AppColors.border,
-            thumbColor: AppColors.white,
-            overlayColor: AppColors.primary.withValues(alpha: 0.2),
-            trackHeight: 4,
-            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-          ),
-          child: Slider(
-            value: value.toDouble(), min: min.toDouble(), max: max.toDouble(),
-            divisions: max - min,
-            onChanged: (v) => onChanged(v.round()),
-          ),
-        ),
       ],
+    );
+  }
+}
+
+class _StepButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback? onTap;
+  final bool enabled;
+
+  const _StepButton({required this.icon, this.onTap, required this.enabled});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 32, height: 24,
+        decoration: BoxDecoration(
+          color: enabled ? AppColors.white : AppColors.divider,
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: enabled ? AppColors.border : AppColors.divider),
+        ),
+        child: Icon(icon, size: 18,
+            color: enabled ? AppColors.textSecondary : AppColors.textHint),
+      ),
     );
   }
 }

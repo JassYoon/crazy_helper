@@ -13,7 +13,7 @@ void main() async {
     center: true,
     backgroundColor: Colors.transparent,
     titleBarStyle: TitleBarStyle.normal,
-    title: '제정신 지킴이',
+    title: 'Crazy Helper',
   );
 
   windowManager.waitUntilReadyToShow(windowOptions, () async {

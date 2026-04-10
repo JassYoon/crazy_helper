@@ -80,7 +80,7 @@ const kPhaseTemplates = [
 final boxBreathing = BreathingMode(
   id: '444',
   name: '4-4-4',
-  description: '박스 호흡',
+  description: '4-4-4',
   isBuiltIn: true,
   phases: const [
     BreathingPhase(label: '들이쉬기', color: kInhaleColor, seconds: 4),
@@ -92,7 +92,7 @@ final boxBreathing = BreathingMode(
 final anxietyRelief = BreathingMode(
   id: '478',
   name: '4-7-8',
-  description: '불안 해소',
+  description: '4-7-8',
   isBuiltIn: true,
   phases: const [
     BreathingPhase(label: '들이쉬기', color: kInhaleColor, seconds: 4),

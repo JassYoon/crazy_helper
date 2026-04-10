@@ -1,31 +1,28 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'todo_item.dart';
-import 'todo_list_type.dart';
+import 'done_item.dart';
+import 'done_list_type.dart';
 
-class TodoStore extends ChangeNotifier {
-  static const _checklistKey = 'todo_checklist';
-  static const _timetableKey = 'todo_timetable';
-  static const _autoResetKey = 'todo_autoReset';
-  static const _lastDateKey = 'todo_lastDate';
-  static const _scoresKey = 'todo_scores';
+class DoneStore extends ChangeNotifier {
+  static const _checklistKey = 'done_checklist';
+  static const _timetableKey = 'done_timetable';
+  static const _lastDateKey = 'done_lastDate';
+  static const _scoresKey = 'done_scores';
 
-  List<TodoItem> _checklistItems = [];
-  List<TodoItem> _timetableItems = [];
-  bool _autoReset = false;
+  List<DoneItem> _checklistItems = [];
+  List<DoneItem> _timetableItems = [];
   bool _loaded = false;
 
-  List<TodoItem> get checklistItems => _checklistItems;
-  List<TodoItem> get timetableItems => _timetableItems;
-  bool get autoReset => _autoReset;
+  List<DoneItem> get checklistItems => _checklistItems;
+  List<DoneItem> get timetableItems => _timetableItems;
   bool get loaded => _loaded;
 
-  List<TodoItem> itemsFor(TodoListType type) {
+  List<DoneItem> itemsFor(DoneListType type) {
     switch (type) {
-      case TodoListType.checklist:
+      case DoneListType.checklist:
         return _checklistItems;
-      case TodoListType.timetable:
+      case DoneListType.timetable:
         return _timetableItems;
     }
   }
@@ -34,26 +31,19 @@ class TodoStore extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     _checklistItems = _decodeList(prefs.getString(_checklistKey));
     _timetableItems = _decodeList(prefs.getString(_timetableKey));
-    _autoReset = prefs.getBool(_autoResetKey) ?? false;
 
-    // Auto-reset check — save previous day's score before resetting
+    // Date change — save previous day's score and clear items for new day
     final today = _todayStr();
     final lastDate = prefs.getString(_lastDateKey);
     if (lastDate != null && lastDate != today) {
-      // Save previous day's score
       final prevScore = _calcScore(_checklistItems, _timetableItems);
       if (prevScore != null) {
         await _saveScoreForDate(prefs, lastDate, prevScore);
       }
-      if (_autoReset) {
-        for (final item in _checklistItems) {
-          item.completed = false;
-        }
-        for (final item in _timetableItems) {
-          item.completed = false;
-        }
-        await _saveAll(prefs);
-      }
+      // Clear items for new day
+      _checklistItems.clear();
+      _timetableItems.clear();
+      await _saveAll(prefs);
     }
     await prefs.setString(_lastDateKey, today);
 
@@ -66,18 +56,18 @@ class TodoStore extends ChangeNotifier {
     return '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
   }
 
-  List<TodoItem> _decodeList(String? json) {
+  List<DoneItem> _decodeList(String? json) {
     if (json == null) return [];
     final list = jsonDecode(json) as List;
     return list
-        .map((e) => TodoItem.fromJson(e as Map<String, dynamic>))
+        .map((e) => DoneItem.fromJson(e as Map<String, dynamic>))
         .toList();
   }
 
-  Future<void> _save(TodoListType type) async {
+  Future<void> _save(DoneListType type) async {
     final prefs = await SharedPreferences.getInstance();
     final key =
-        type == TodoListType.checklist ? _checklistKey : _timetableKey;
+        type == DoneListType.checklist ? _checklistKey : _timetableKey;
     final items = itemsFor(type);
     await prefs.setString(
         key, jsonEncode(items.map((e) => e.toJson()).toList()));
@@ -93,82 +83,54 @@ class TodoStore extends ChangeNotifier {
   // ── Checklist operations ──
 
   void addChecklistItem(String content) {
-    _checklistItems.add(TodoItem(
+    _checklistItems.add(DoneItem(
       id: _genId(),
       content: content,
     ));
     notifyListeners();
-    _save(TodoListType.checklist);
+    _save(DoneListType.checklist);
   }
 
   void removeChecklistItem(int index) {
     _checklistItems.removeAt(index);
     notifyListeners();
-    _save(TodoListType.checklist);
+    _save(DoneListType.checklist);
   }
 
   // ── Timetable operations ──
 
   void addTimetableItem(int hour, String content) {
-    _timetableItems.add(TodoItem(
+    _timetableItems.add(DoneItem(
       id: _genId(),
       content: content,
       hour: hour,
     ));
     notifyListeners();
-    _save(TodoListType.timetable);
+    _save(DoneListType.timetable);
   }
 
   void removeTimetableItem(String id) {
     _timetableItems.removeWhere((e) => e.id == id);
     notifyListeners();
-    _save(TodoListType.timetable);
+    _save(DoneListType.timetable);
   }
 
-  List<TodoItem> timetableItemsForHour(int hour) {
+  List<DoneItem> timetableItemsForHour(int hour) {
     return _timetableItems.where((e) => e.hour == hour).toList();
   }
 
   // ── Common operations ──
 
-  void updateItem(TodoListType type, String id,
-      {String? content, int? importance, bool? completed}) {
+  void updateItem(DoneListType type, String id,
+      {String? content, int? importance}) {
     final items = itemsFor(type);
     final idx = items.indexWhere((e) => e.id == id);
     if (idx == -1) return;
     final item = items[idx];
     if (content != null) item.content = content;
     if (importance != null) item.importance = importance;
-    if (completed != null) item.completed = completed;
     notifyListeners();
     _save(type);
-  }
-
-  void toggleCompleted(TodoListType type, String id) {
-    final items = itemsFor(type);
-    final idx = items.indexWhere((e) => e.id == id);
-    if (idx == -1) return;
-    items[idx].completed = !items[idx].completed;
-    notifyListeners();
-    _save(type);
-  }
-
-  void bulkToggleCompleted(TodoListType type) {
-    final items = itemsFor(type);
-    if (items.isEmpty) return;
-    final allDone = items.every((e) => e.completed);
-    for (final item in items) {
-      item.completed = !allDone;
-    }
-    notifyListeners();
-    _save(type);
-  }
-
-  void setAutoReset(bool value) async {
-    _autoReset = value;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_autoResetKey, value);
-    notifyListeners();
   }
 
   String _genId() =>
@@ -176,16 +138,11 @@ class TodoStore extends ChangeNotifier {
 
   // ── Score operations ──
 
-  /// Calculate score: (completed importance sum / total importance sum) * 100
-  /// Returns null if no items exist.
-  int? _calcScore(List<TodoItem> checklist, List<TodoItem> timetable) {
+  /// Score = total importance sum of all items.
+  int? _calcScore(List<DoneItem> checklist, List<DoneItem> timetable) {
     final allItems = [...checklist, ...timetable];
     if (allItems.isEmpty) return null;
-    final totalImportance = allItems.fold<int>(0, (sum, e) => sum + e.importance);
-    if (totalImportance == 0) return 0;
-    final completedImportance =
-        allItems.where((e) => e.completed).fold<int>(0, (sum, e) => sum + e.importance);
-    return (completedImportance / totalImportance * 100).round();
+    return allItems.fold<int>(0, (sum, e) => sum + e.importance);
   }
 
   /// Current day's score (live calculation).
@@ -204,7 +161,7 @@ class TodoStore extends ChangeNotifier {
     return map.map((k, v) => MapEntry(k, v as int));
   }
 
-  /// Save today's score manually (e.g. when opening calendar).
+  /// Save today's score manually.
   Future<void> saveTodayScore() async {
     final score = todayScore;
     if (score == null) return;
@@ -212,11 +169,10 @@ class TodoStore extends ChangeNotifier {
     await _saveScoreForDate(prefs, _todayStr(), score);
   }
 
-  /// Get all saved scores (date string → score).
+  /// Get all saved scores.
   Future<Map<String, int>> getScores() async {
     final prefs = await SharedPreferences.getInstance();
     final scores = _loadScores(prefs);
-    // Include today's live score
     final ts = todayScore;
     if (ts != null) {
       scores[_todayStr()] = ts;

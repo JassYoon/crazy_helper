@@ -87,9 +87,7 @@ class _CrazyHelperAppState extends State<CrazyHelperApp> with WindowListener {
       },
       home: _mode == AppMode.home
           ? HomeScreen(
-              onModuleDragToMenu: (moduleId) {
-                _registry.addToMenu(moduleId);
-              },
+              registry: _registry,
               onSwitchToWidget: _switchToWidgetMode,
             )
           : FloatingWidgetScreen(

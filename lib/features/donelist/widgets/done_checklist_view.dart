@@ -1,27 +1,27 @@
 import 'package:flutter/material.dart';
 import '../../../core/app_text_input.dart';
 import '../../../core/theme.dart';
-import '../models/todo_item.dart';
-import '../models/todo_list_type.dart';
-import '../models/todo_store.dart';
-import 'star_rating.dart';
+import '../../todolist/widgets/star_rating.dart';
+import '../models/done_item.dart';
+import '../models/done_list_type.dart';
+import '../models/done_store.dart';
 
-class ChecklistView extends StatefulWidget {
-  final TodoStore store;
-  const ChecklistView({super.key, required this.store});
+class DoneChecklistView extends StatefulWidget {
+  final DoneStore store;
+  const DoneChecklistView({super.key, required this.store});
 
   @override
-  State<ChecklistView> createState() => _ChecklistViewState();
+  State<DoneChecklistView> createState() => _DoneChecklistViewState();
 }
 
-class _ChecklistViewState extends State<ChecklistView> {
+class _DoneChecklistViewState extends State<DoneChecklistView> {
   bool _sortByImportance = false;
   final _addController = TextEditingController();
 
-  TodoStore get _store => widget.store;
-  List<TodoItem> get _items => _store.checklistItems;
+  DoneStore get _store => widget.store;
+  List<DoneItem> get _items => _store.checklistItems;
 
-  List<(int originalIndex, TodoItem item)> get _displayItems {
+  List<(int originalIndex, DoneItem item)> get _displayItems {
     final indexed = _items.asMap().entries.map((e) => (e.key, e.value)).toList();
     if (_sortByImportance) {
       indexed.sort((a, b) => b.$2.importance.compareTo(a.$2.importance));
@@ -45,7 +45,6 @@ class _ChecklistViewState extends State<ChecklistView> {
   @override
   Widget build(BuildContext context) {
     final items = _displayItems;
-    final allDone = _items.isNotEmpty && _items.every((e) => e.completed);
 
     return Column(
       children: [
@@ -78,17 +77,6 @@ class _ChecklistViewState extends State<ChecklistView> {
                   ),
                 ),
               ),
-              GestureDetector(
-                onTap: () => _store.bulkToggleCompleted(TodoListType.checklist),
-                child: SizedBox(
-                  width: 36,
-                  child: Icon(
-                    allDone ? Icons.check_box : Icons.check_box_outline_blank,
-                    color: allDone ? AppColors.success : AppColors.textHint,
-                    size: 18,
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -99,26 +87,21 @@ class _ChecklistViewState extends State<ChecklistView> {
             child: items.isEmpty
                 ? Center(
                     child: Text(
-                      '할 일을 추가하세요',
-                      style: appStyle(
-                        context,
-                        color: AppColors.textHint,
-                        fontSize: 14,
-                      ),
+                      '한 일을 추가하세요',
+                      style: appStyle(context, color: AppColors.textHint, fontSize: 14),
                     ),
                   )
                 : ListView.builder(
                     itemCount: items.length,
                     itemBuilder: (context, i) {
                       final (originalIndex, item) = items[i];
-                      return _ChecklistRow(
+                      return _DoneChecklistRow(
                         number: originalIndex + 1,
                         item: item,
-                        onToggleComplete: () => _store.toggleCompleted(TodoListType.checklist, item.id),
                         onImportanceChanged: (val) =>
-                            _store.updateItem(TodoListType.checklist, item.id, importance: val),
+                            _store.updateItem(DoneListType.checklist, item.id, importance: val),
                         onContentChanged: (val) =>
-                            _store.updateItem(TodoListType.checklist, item.id, content: val),
+                            _store.updateItem(DoneListType.checklist, item.id, content: val),
                         onDelete: () {
                           final idx = _store.checklistItems.indexWhere((e) => e.id == item.id);
                           if (idx != -1) _store.removeChecklistItem(idx);
@@ -141,18 +124,10 @@ class _ChecklistViewState extends State<ChecklistView> {
                 child: TextField(
                   controller: _addController,
                   keyboardType: AppTextInput.keyboard,
-                  style: appStyle(
-                    context,
-                    color: AppColors.textPrimary,
-                    fontSize: 13,
-                  ),
+                  style: appStyle(context, color: AppColors.textPrimary, fontSize: 13),
                   decoration: InputDecoration(
-                    hintText: '새 할 일 입력...',
-                    hintStyle: appStyle(
-                      context,
-                      color: AppColors.textHint,
-                      fontSize: 13,
-                    ),
+                    hintText: '한 일 입력...',
+                    hintStyle: appStyle(context, color: AppColors.textHint, fontSize: 13),
                     filled: true,
                     fillColor: AppColors.white,
                     border: OutlineInputBorder(
@@ -191,25 +166,24 @@ class _ChecklistViewState extends State<ChecklistView> {
       );
 }
 
-class _ChecklistRow extends StatefulWidget {
+class _DoneChecklistRow extends StatefulWidget {
   final int number;
-  final TodoItem item;
-  final VoidCallback onToggleComplete;
+  final DoneItem item;
   final ValueChanged<int> onImportanceChanged;
   final ValueChanged<String> onContentChanged;
   final VoidCallback onDelete;
 
-  const _ChecklistRow({
+  const _DoneChecklistRow({
     required this.number, required this.item,
-    required this.onToggleComplete, required this.onImportanceChanged,
+    required this.onImportanceChanged,
     required this.onContentChanged, required this.onDelete,
   });
 
   @override
-  State<_ChecklistRow> createState() => _ChecklistRowState();
+  State<_DoneChecklistRow> createState() => _DoneChecklistRowState();
 }
 
-class _ChecklistRowState extends State<_ChecklistRow> {
+class _DoneChecklistRowState extends State<_DoneChecklistRow> {
   late TextEditingController _controller;
   bool _editing = false;
   bool _hovering = false;
@@ -221,7 +195,7 @@ class _ChecklistRowState extends State<_ChecklistRow> {
   }
 
   @override
-  void didUpdateWidget(covariant _ChecklistRow oldWidget) {
+  void didUpdateWidget(covariant _DoneChecklistRow oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.item.content != widget.item.content && !_editing) {
       _controller.text = widget.item.content;
@@ -236,7 +210,6 @@ class _ChecklistRowState extends State<_ChecklistRow> {
 
   @override
   Widget build(BuildContext context) {
-    final done = widget.item.completed;
     return MouseRegion(
       onEnter: (_) => setState(() => _hovering = true),
       onExit: (_) => setState(() => _hovering = false),
@@ -256,10 +229,8 @@ class _ChecklistRowState extends State<_ChecklistRow> {
                 style: appStyle(
                   context,
                   fontSize: 13,
-                  color: done ? AppColors.textHint : AppColors.textSecondary,
+                  color: AppColors.textSecondary,
                   fontWeight: FontWeight.w500,
-                  decoration: done ? TextDecoration.lineThrough : null,
-                  decorationColor: AppColors.textHint,
                 ),
               ),
             ),
@@ -269,11 +240,7 @@ class _ChecklistRowState extends State<_ChecklistRow> {
                       controller: _controller,
                       autofocus: true,
                       keyboardType: AppTextInput.keyboard,
-                      style: appStyle(
-                        context,
-                        color: AppColors.textPrimary,
-                        fontSize: 13,
-                      ),
+                      style: appStyle(context, color: AppColors.textPrimary, fontSize: 13),
                       decoration: const InputDecoration(
                         border: InputBorder.none,
                         isDense: true,
@@ -286,28 +253,11 @@ class _ChecklistRowState extends State<_ChecklistRow> {
                       onDoubleTap: () => setState(() => _editing = true),
                       child: Text(
                         widget.item.content,
-                        style: appStyle(
-                          context,
-                          fontSize: 13,
-                          color: done ? AppColors.textHint : AppColors.textPrimary,
-                          decoration: done ? TextDecoration.lineThrough : null,
-                          decorationColor: AppColors.textHint,
-                        ),
+                        style: appStyle(context, fontSize: 13, color: AppColors.textPrimary),
                       ),
                     ),
             ),
             SizedBox(width: 108, child: StarRating(rating: widget.item.importance, onChanged: widget.onImportanceChanged, size: 16)),
-            SizedBox(
-              width: 36,
-              child: GestureDetector(
-                onTap: widget.onToggleComplete,
-                child: Icon(
-                  done ? Icons.check_box : Icons.check_box_outline_blank,
-                  color: done ? AppColors.success : AppColors.textHint,
-                  size: 18,
-                ),
-              ),
-            ),
             SizedBox(
               width: 24,
               child: _hovering

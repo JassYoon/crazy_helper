@@ -1,15 +1,13 @@
-class TodoItem {
+class DoneItem {
   final String id;
   String content;
   int importance; // 1-5
-  bool completed;
   int? hour; // null for checklist, 0-23 for timetable
 
-  TodoItem({
+  DoneItem({
     required this.id,
     this.content = '',
     this.importance = 1,
-    this.completed = false,
     this.hour,
   });
 
@@ -17,32 +15,28 @@ class TodoItem {
         'id': id,
         'content': content,
         'importance': importance,
-        'completed': completed,
         'hour': hour,
       };
 
-  factory TodoItem.fromJson(Map<String, dynamic> json) {
-    return TodoItem(
+  factory DoneItem.fromJson(Map<String, dynamic> json) {
+    return DoneItem(
       id: json['id'] as String,
       content: json['content'] as String? ?? '',
       importance: (json['importance'] as int? ?? 1).clamp(1, 5),
-      completed: json['completed'] as bool? ?? false,
       hour: json['hour'] as int?,
     );
   }
 
-  TodoItem copyWith({
+  DoneItem copyWith({
     String? id,
     String? content,
     int? importance,
-    bool? completed,
     int? Function()? hour,
   }) {
-    return TodoItem(
+    return DoneItem(
       id: id ?? this.id,
       content: content ?? this.content,
       importance: importance ?? this.importance,
-      completed: completed ?? this.completed,
       hour: hour != null ? hour() : this.hour,
     );
   }
